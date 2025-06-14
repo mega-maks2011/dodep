@@ -1,0 +1,2309 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игра с Коробками и Коллекциями</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            /* Убрано Imgur. Если хотите использовать свое, замените URL. */
+            background-image: url(''); /* Замените на путь к вашему фоновому изображению */
+            background-size: cover;
+            background-position: center;
+        }
+
+        .container {
+            background-color: rgba(44, 62, 80, 0.9);
+            border: 2px solid #34495e;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            width: 90%;
+            max-width: 1200px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2 {
+            color: #e67e22;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 2px solid #34495e;
+        }
+
+        .energy-section {
+            display: flex;
+            align-items: center;
+            background-color: #34495e;
+            padding: 8px 15px;
+            border-radius: 5px;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .energy-section img {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+            vertical-align: middle;
+            /* Убрано Imgur. Замените на путь к вашей иконке энергии */
+            content: url(''); /* Добавьте путь к вашей иконке энергии, например: url('images/energy_icon.png') */
+        }
+
+        #energy {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #f1c40f;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        #getEnergyButton {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            margin-left: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        #getEnergyButton:hover {
+            background-color: #2ecc71;
+            transform: translateY(-2px);
+        }
+
+        #getEnergyButton:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        #getEnergyButton:disabled {
+            background-color: #7f8c8d;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .cooldown {
+            background-color: #e67e22 !important; /* Оттенок для кулдауна */
+        }
+
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .shop-item {
+            background-color: #34495e;
+            border: 2px solid #2c3e50;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .shop-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .shop-item h3 {
+            margin: 10px 0 5px;
+            color: #ecf0f1;
+            font-size: 0.9em;
+        }
+
+        .shop-item-price {
+            font-size: 0.8em;
+            color: #f1c40f;
+            margin-bottom: 10px;
+        }
+
+        .shop-item button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7em;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .shop-item button:hover {
+            background-color: #c0392b;
+        }
+
+        .box-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 5px;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            border: 2px solid;
+            /* Убрано Imgur. Замените на путь к вашей текстуре коробки. */
+            background-image: url(''); /* Замените на путь к вашей текстуре дерева */
+            background-size: cover;
+        }
+        .box-wood { background-color: #A0522D; border-color: #8B4513; }
+        .box-stone { background-color: #696969; border-color: #4F4F4F; }
+        .box-iron { background-color: #8B4513; border-color: #5C4033; }
+        .box-silver { background-color: #C0C0C0; border-color: #A9A9A9; }
+        .box-gold { background-color: #FFD700; border-color: #DAA520; }
+        .box-crystal { background-color: #DCDCDC; border-color: #B0C4DE; }
+        .box-ancient { background-color: #8B4513; border-color: #5C4033; }
+        .box-legendary { background-color: #FF4500; border-color: #B22222; }
+        .box-mythic { background-color: #8A2BE2; border-color: #4B0082; }
+        .box-divine { background-color: #4682B4; border-color: #2F4F4F; }
+
+
+        .collection-grid, .sell-grid, .market-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            padding: 20px 0;
+            max-height: 400px; /* Ограничение высоты для прокрутки */
+            overflow-y: auto; /* Добавление прокрутки */
+            border: 1px solid #34495e;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: rgba(52, 73, 94, 0.5); /* Полупрозрачный фон */
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .collection-item, .sell-item, .market-item {
+            background-color: #34495e;
+            border: 1px solid #2c3e50;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .sell-item.selected-for-sell, .market-item.selected-for-buy {
+            border: 2px solid #2ecc71;
+            box-shadow: 0 0 8px #2ecc71;
+            background-color: #4a6a8c;
+        }
+        .sell-item:hover, .market-item:hover {
+            transform: translateY(-2px);
+        }
+
+
+        .collection-item div:first-child, .sell-item div:first-child, .market-item div:first-child {
+            margin-bottom: 5px;
+        }
+        .item-placeholder {
+            width: 60px;
+            height: 60px;
+            border-radius: 4px;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+            border: 1px solid;
+            /* Убрано Imgur. Замените на путь к вашей текстуре предмета. */
+            background-image: url('');
+            background-size: cover;
+        }
+
+        .item-quality {
+            font-size: 0.7em;
+            margin-top: 5px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            white-space: nowrap; /* Предотвращает перенос текста */
+        }
+        .quality-perfect { color: #00FFFF; text-shadow: 0 0 5px #00FFFF; } /* Ярко-голубой */
+        .quality-excellent { color: #00FF00; text-shadow: 0 0 5px #00FF00; } /* Ярко-зеленый */
+        .quality-good { color: #7FFF00; text-shadow: 0 0 5px #7FFF00; }    /* Салатовый */
+        .quality-medium { color: #FFFF00; text-shadow: 0 0 5px #FFFF00; }  /* Желтый */
+        .quality-fair { color: #FFA500; text-shadow: 0 0 5px #FFA500; }    /* Оранжевый */
+        .quality-poor { color: #FF0000; text-shadow: 0 0 5px #FF0000; }    /* Красный */
+        .quality-terrible { color: #8B0000; text-shadow: 0 0 5px #8B0000; } /* Темно-красный */
+
+
+        .sell-item-price-tag {
+            font-size: 0.8em;
+            color: #f1c40f;
+            margin-top: 5px;
+        }
+        .market-item-price-tag {
+            font-size: 0.8em;
+            color: #f1c40f;
+            margin-top: 5px;
+        }
+
+        .market-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .market-actions button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            transition: background-color 0.3s ease;
+            font-size: 0.8em;
+        }
+        .market-actions button:hover {
+            background-color: #2ecc71;
+        }
+        .market-actions button:disabled {
+            background-color: #7f8c8d;
+            cursor: not-allowed;
+        }
+
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .button-group button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8em;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .button-group button:hover {
+            background-color: #2980b9;
+        }
+
+        .button-group button:disabled {
+            background-color: #7f8c8d;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #34495e;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+            position: relative; /* Важно: для правильного позиционирования дочерних абсолютно позиционированных элементов */
+            animation: modalFadeIn 0.3s ease-out;
+            border: 2px solid #2c3e50;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .close-button {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            color: #ecf0f1;
+            font-size: 2em;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-button:hover {
+            color: #e74c3c;
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            color: #e67e22;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-info {
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        #modalItemList, #sellItemList, #marketItemList {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            background-color: #2c3e50;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            border: 1px solid #34495e;
+        }
+
+        #modalItemList div, #marketItemList div {
+            background-color: #3f5a77;
+            padding: 5px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            color: #ecf0f1;
+            border: 1px solid #2c3e50;
+        }
+
+        .modal-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-actions input[type="number"] {
+            width: 100px;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #34495e;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8em;
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        .modal-actions button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-actions button.red {
+            background-color: #e74c3c;
+        }
+        .modal-actions button.red:hover {
+            background-color: #c0392b;
+        }
+
+        .modal-actions button:hover {
+            background-color: #2ecc71;
+        }
+
+        .modal-actions button:disabled {
+            background-color: #7f8c8d;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Animation */
+        #boxAnimationContainer {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            position: absolute; /* Позиционируем относительно modal-content */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            z-index: 10; /* Убедитесь, что он поверх других элементов модального окна */
+        }
+
+        #animationScroller {
+            width: 90%;
+            max-width: 500px;
+            height: 100px;
+            overflow: hidden;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            border: 2px solid #e67e22;
+            border-radius: 8px;
+            background-color: #1a252f;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
+            /* Убрано transition отсюда, оно будет устанавливаться JS */
+            transform: translateX(0); /* Начальное положение */
+        }
+
+        .animation-item {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 80px; /* Ширина элемента в анимации */
+            flex-shrink: 0;
+            margin: 0 5px;
+            font-size: 0.7em;
+            color: #ecf0f1;
+            text-align: center;
+        }
+
+        .item-placeholder-small {
+            width: 50px;
+            height: 50px;
+            border-radius: 3px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+            border: 1px solid;
+            /* Убрано Imgur. Замените на путь к вашей текстуре предмета для анимации. */
+            background-image: url('');
+            background-size: cover;
+        }
+
+        #animationResult {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #f1c40f;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+
+        /* Item Result Modal */
+        #itemResultModal .modal-content {
+            max-width: 400px;
+            text-align: center;
+        }
+        #itemResultModal h2 {
+            margin-bottom: 15px;
+        }
+        #resultItemPlaceholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 5px;
+            margin: 15px auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            border: 2px solid;
+            /* Убрано Imgur. Замените на путь к вашей текстуре предмета. */
+            background-image: url('');
+            background-size: cover;
+        }
+        #resultItemName {
+            font-size: 1.2em;
+            color: #ecf0f1;
+            margin-bottom: 5px;
+        }
+        #resultItemQuality {
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        #resultItemPrice {
+            font-size: 1em;
+            color: #f1c40f;
+            margin-bottom: 20px;
+        }
+        #itemResultModal .modal-actions {
+            flex-direction: row;
+            justify-content: space-around;
+        }
+
+
+        /* Captcha Modal */
+        #captchaModal .modal-content {
+            max-width: 400px;
+            text-align: center;
+        }
+        #captchaQuestion {
+            font-size: 1.5em;
+            color: #f1c40f;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        #captchaAnswer {
+            width: 80%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #34495e;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        #captchaModal .modal-actions button {
+            width: 100%;
+        }
+        #captchaMessage {
+            color: #e74c3c;
+            margin-top: 10px;
+            font-size: 0.8em;
+        }
+        #newCaptchaButton {
+            background-color: #3498db;
+        }
+        #newCaptchaButton:hover {
+            background-color: #2980b9;
+        }
+
+
+        .tab-menu {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #34495e;
+            padding-bottom: 10px;
+        }
+
+        .tab-button {
+            background-color: #34495e;
+            color: #ecf0f1;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            margin: 0 5px;
+            box-shadow: 0 -3px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .tab-button.active {
+            background-color: #e67e22;
+            color: white;
+            box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .tab-button:hover:not(.active) {
+            background-color: #4a6a8c;
+        }
+
+        .tab-content {
+            display: none;
+            padding-top: 20px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="energy-section">
+                <img src="" alt="Energy"> Энергия: <span id="energy">0</span>
+                <button id="getEnergyButton">Получить Энергию (+1)</button>
+            </div>
+            <div class="header-buttons">
+                <button id="openSellModalButton" class="button-group-single">Продать предметы</button>
+            </div>
+        </div>
+
+        <h1>Мир Загадочных Коробок</h1>
+
+        <div class="tab-menu">
+            <button class="tab-button active" data-tab="shop">Магазин Коробков</button>
+            <button class="tab-button" data-tab="collection">Моя Коллекция</button>
+            <button class="tab-button" data-tab="market">Биржа</button>
+        </div>
+
+        <div id="shop" class="tab-content active">
+            <h2>Откройте свою удачу!</h2>
+            <div id="surpriseShop" class="shop-grid">
+                </div>
+        </div>
+
+        <div id="collection" class="tab-content">
+            <h2>Ваши сокровища</h2>
+            <div id="collectionList" class="collection-grid">
+                </div>
+        </div>
+
+        <div id="market" class="tab-content">
+            <h2>Биржа Предметов</h2>
+            <p style="text-align: center; font-size: 0.8em; color: #ccc;">Цены обновляются каждые 30 секунд.</p>
+            <div id="marketItemList" class="market-grid">
+                </div>
+            <div class="market-actions">
+                <button id="buyMarketItemsButton">Купить выбранное</button>
+                <button id="sellMarketItemsButton">Продать выбранное на бирже</button>
+                <button id="refreshMarketButton">Обновить цены</button>
+            </div>
+        </div>
+
+
+    </div>
+
+    <div id="boxModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeBoxModal">&times;</span>
+            <h2>Открыть Коробку</h2>
+            <div class="modal-info">
+                <p>Вы выбрали: <span id="modalBoxName"></span></p>
+                <p>Цена за 1 коробку: <span id="modalBoxPrice"></span> Энергии</p>
+                <h3>Возможные предметы:</h3>
+                <div id="modalItemList">
+                    </div>
+            </div>
+            <div class="modal-actions">
+                <label for="openQuantity">Количество открытий:</label>
+                <input type="number" id="openQuantity" value="1" min="1">
+                <button id="buyWithAnimationButton">Открыть (с анимацией)</button>
+                <button id="buyFastButton" class="red">Купить быстро</button>
+            </div>
+
+            <div id="boxAnimationContainer">
+                <div id="animationScroller"></div>
+                <div id="animationResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="itemResultModal" class="modal">
+        <div class="modal-content">
+            <h2>Получен Предмет!</h2>
+            <div id="resultItemPlaceholder"></div>
+            <div id="resultItemName"></div>
+            <div id="resultItemQuality"></div>
+            <div id="resultItemPrice"></div>
+            <div class="modal-actions">
+                <button id="keepItemButton">Оставить</button>
+                <button id="sellItemButton" class="red">Продать</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sellModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeSellModal">&times;</span>
+            <h2>Продать Предметы</h2>
+            <div id="sellItemList" class="sell-grid">
+                </div>
+            <div class="button-group">
+                <button id="sellSelectedItemsButton">Продать выбранное (0 Энергии)</button>
+                <button id="sellAllItemsButton" class="red">Продать всё</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="captchaModal" class="modal">
+        <div class="modal-content">
+            <h2>Проверка на бота</h2>
+            <p id="captchaQuestion"></p>
+            <input type="text" id="captchaAnswer" placeholder="Ваш ответ">
+            <div class="modal-actions">
+                <button id="submitCaptchaButton">Ответить</button>
+                <button id="newCaptchaButton" class="red">Новая задача</button>
+            </div>
+            <p id="captchaMessage"></p>
+        </div>
+    </div>
+
+
+<script>
+    let energy = 0;
+    let collection = {}; // { itemName: [{ id: uuid, name: itemName, quality: float, currentMarketPrice: float (optional) }] }
+    let selectedItemsToSell = {}; // { itemId: true }
+    let selectedMarketItems = { buy: {}, sell: {} }; // { itemId: true } для покупки, { itemId: true } для продажи
+    let marketItems = {}; // { itemId: { name, quality, price } }
+    let isEnergyCooldown = false;
+    const ENERGY_COOLDOWN_TIME = 10; // Время кулдауна в секундах
+    const CAPTCHA_INTERVAL_MINUTES = 10; // Интервал капчи в минутах
+    const CAPTCHA_INTERVAL_MS = CAPTCHA_INTERVAL_MINUTES * 60 * 1000; // Интервал капчи в миллисекундах
+    let lastCaptchaTime = 0; // Время последнего прохождения капчи
+    const MARKET_REFRESH_INTERVAL_MS = 30 * 1000; // Интервал обновления цен на бирже (30 секунд)
+    let marketRefreshTimer = null;
+
+    const DEBUG_PASSWORD = "gemini";
+    let debugModeEnabled = false;
+
+    let itemsToProcessQueue = [];
+    let isProcessingItem = false;
+    let captchaExpectedAnswer = 0;
+
+    // --- Все данные о предметах и коробках теперь ВНУТРИ JS ---
+    const itemColors = {
+        // Tier 1: Древесина и Природа
+        "Ветвь": "#A0522D", "Сучок": "#CD853F", "Сосновая шишка": "#8B4513", "Желудь": "#BDB76B",
+        "Мох": "#556B2F", "Лист папоротника": "#228B22", "Кора дерева": "#8B4513", "Камень-галька": "#A9A9A9",
+        "Кусок мха": "#6B8E23", "Маленький гриб": "#D2B48C", "Ивовый прутик": "#8FBC8F", "Земляной червь": "#8B4513",
+        "Опавший лист": "#CD5C5C", "Древесная смола": "#8B0000", "Засохшая трава": "#8B4513", "Корень": "#A0522D",
+        "Цветок": "#FF69B4", "Ягода": "#8B0000",
+
+        // Tier 2: Камни
+        "Кремень": "#696969", "Обсидиан": "#2F4F4F", "Мраморный осколок": "#DCDCDC", "Гравий": "#778899",
+        "Базальт": "#4F4F4F", "Гранит": "#808080", "Янтарь": "#FFBF00", "Сердолик": "#DC143C",
+        "Осколок гранита": "#6A5ACD", "Песчаник": "#F4A460", "Известняк": "#F5DEB3", "Кварц": "#DCDCDC",
+        "Алебастр": "#F8F8F8", "Сланец": "#708090", "Каменный уголь": "#36451F", "Агат": "#964B00",
+        "Оникс": "#36454F", "Лава": "#FF4500", "Галька": "#A9A9A9",
+
+        // Tier 3: Металлы
+        "Железная руда": "#8B4513", "Слиток железа": "#A9A9A9", "Ржавый гвоздь": "#B22222", "Шестерёнка": "#A9A9A9",
+        "Болт": "#101010", "Гайка": "#101010", "Стальная пружина": "#708090", "Металлическая крошка": "#B0C4DE",
+        "Кованный крюк": "#5A5A5A", "Цепь": "#4A4A4A", "Железный обруч": "#6A6A6A", "Осколок меча": "#999999",
+        "Инструмент": "#778899", "Проволока": "#A9A9A9", "Шуруп": "#5C4033", "Медная руда": "#B87333",
+        "Бронзовый слиток": "#CD7F32", "Мифриловая руда": "#ADD8E6",
+
+        // Tier 4: Драгоценности
+        "Серебряный самородок": "#C0C0C0", "Серебряная монета": "#D3D3D3", "Серебряная пыль": "#E0E0E0", "Серебряный слиток": "#B0B0B0",
+        "Бирюза": "#40E0D0", "Лазурит": "#3F00FF", "Лунный камень": "#DCDCDC", "Опал": "#ADD8E6",
+        "Жемчужина": "#F5F5DC", "Речной жемчуг": "#F0F8FF", "Серебряное кольцо": "#A9A9A9", "Малая корона": "#FFD700",
+        "Амулет удачи": "#7CFC00", "Платиновая руда": "#E5E4E2", "Иридиевый слиток": "#808080", "Алмазная крошка": "#B9F2FF",
+
+        // Tier 5: Элитные Драгоценности
+        "Золотой самородок": "#FFD700", "Золотая монета": "#DAA520", "Золотая пыль": "#FFC72C", "Золотой слиток": "#B8860B",
+        "Изумруд": "#008000", "Сапфир": "#000080", "Рубин": "#E0115F", "Алмаз": "#B9F2FF",
+        "Чистый топаз": "#FFD700", "Аквамарин": "#7FFFD4", "Ограненный алмаз": "#25B2FF", "Корона короля": "#FFD700",
+        "Скипетр": "#DAA520", "Сундук с сокровищами": "#8B4513", "Черный опал": "#36454F", "Палантир": "#6A5ACD",
+
+        // Tier 6: Кристаллы и Магия
+        "Кварцевый кристалл": "#DCDCDC", "Аметист": "#9966CC", "Топаз": "#FFC04D", "Флюорит": "#7FFF00",
+        "Метеоритный осколок": "#808080", "Звездная пыль": "#DDA0DD", "Фрагмент кометы": "#ADD8E6",
+        "Кристалл маны": "#0000FF", "Энергетический кристалл": "#FF4500", "Кристалл исцеления": "#00FF00", "Призматический осколок": "#FF00FF",
+        "Магический артефакт": "#8A2BE2", "Кристалл души": "#800080", "Вихревой камень": "#4682B4",
+
+        // Tier 7: Древние Артефакты
+        "Древний свиток": "#F5DEB3", "Осколок реликвии": "#8B4513", "Забытый амулет": "#A9A9A9", "Мистическая руна": "#000000",
+        "Фрагмент карты сокровищ": "#DEB887", "Запечатанный пергамент": "#FDF5E6", "Ископаемое яйцо": "#D2B48C", "Окаменевшее сердце": "#8B0000",
+        "Меч героя": "#A9A9A9", "Щит мудреца": "#6A5ACD", "Шлем доблести": "#C0C0C0", "Доспехи света": "#F0F8FF",
+        "Кольцо власти": "#FFD700", "Книга заклинаний": "#DAA520", "Ключ от измерения": "#4682B4", "Посох древности": "#8B4513",
+        "Плащ теней": "#2F4F4F",
+
+        // Tier 8: Легендарные Предметы
+        "Сердце дракона": "#FF4500", "Перо феникса": "#FFA500", "Кровь единорога": "#FF69B4", "Эликсир бессмертия": "#00FF00",
+        "Меч Света": "#FFD700", "Щит Героя": "#A9A9A9", "Магический свиток": "#DEB887", "Амулет удачи": "#7CFC00",
+        "Корона мироздания": "#FFD700", "Сфера предсказаний": "#000080", "Клинок вечности": "#6A5ACD", "Плащ невидимости": "#2F4F4F",
+        "Арфа забвения": "#DAA520", "Кристалл жизни": "#00FF00", "Камень душ": "#800080", "Око мудрости": "#ADD8E6",
+        "Чаша изобилия": "#DAA520",
+
+        // Tier 9: Мифические Предметы
+        "Осколок мироздания": "#8A2BE2", "Слеза титана": "#4B0082", "Эссенция хаоса": "#FF00FF", "Сердце вселенной": "#8B008B",
+        "Длань времени": "#00FFFF", "Пламя творения": "#FF8C00", "Звездная корона": "#FFD700", "Космический амулет": "#ADD8E6",
+        "Меч судьбы": "#A9A9A9", "Щит абсолюта": "#6A5ACD", "Шлем вечности": "#C0C0C0", "Доспехи бога": "#F0F8FF",
+        "Кольцо бесконечности": "#FFD700", "Книга мироздания": "#DAA520", "Ключ от всех миров": "#4682B4",
+
+        // Tier 10: Божественные Предметы
+        "Ядро мира": "#4682B4", "Искра жизни": "#00FF00", "Дыхание богов": "#8B008B", "Осколок предвечности": "#2F4F4F",
+        "Вечный двигатель": "#FFD700", "Слеза дракона-архонта": "#FF4500", "Перо божественного феникса": "#FFA500",
+        "Кровь первородного единорога": "#FF69B4", "Эликсир бессмертия богов": "#00FF00", "Меч абсолютного света": "#FFD700",
+        "Щит нерушимости": "#A9A9A9", "Магический свиток высших измерений": "#708090", "Амулет беспредельного удачи": "#7CFC00",
+        "Корона абсолютного мироздания": "#FFD700", "Сфера всезнания": "#000080", "Клинок первородного хаоса": "#6A5ACD",
+        "Плащ абсолютной невидимости": "#2F4F4F", "Арфа забвения богов": "#DAA520", "Кристалл абсолютной жизни": "#00FF00",
+        "Камень абсолютных душ": "#800080"
+    };
+
+
+    const baseSellPrices = {
+        // Tier 1
+        "Ветвь": 1, "Сучок": 1, "Сосновая шишка": 2, "Желудь": 2, "Мох": 1, "Лист папоротника": 2, "Кора дерева": 1, "Камень-галька": 1,
+        "Кусок мха": 1, "Маленький гриб": 3, "Ивовый прутик": 2, "Земляной червь": 1, "Опавший лист": 1, "Древесная смола": 3,
+        "Засохшая трава": 1, "Корень": 2, "Цветок": 3, "Ягода": 2,
+
+        // Tier 2
+        "Кремень": 4, "Обсидиан": 5, "Мраморный осколок": 6, "Гравий": 3, "Базальт": 5, "Гранит": 7, "Янтарь": 10, "Сердолик": 12,
+        "Осколок гранита": 6, "Песчаник": 4, "Известняк": 4, "Кварц": 8, "Алебастр": 9, "Сланец": 5, "Каменный уголь": 7,
+        "Агат": 11, "Оникс": 13, "Лава": 15, "Галька": 3,
+
+        // Tier 3
+        "Железная руда": 15, "Слиток железа": 20, "Ржавый гвоздь": 8, "Шестерёнка": 18, "Болт": 10, "Гайка": 10, "Стальная пружина": 16, "Металлическая крошка": 9,
+        "Кованный крюк": 22, "Цепь": 25, "Железный обруч": 20, "Осколок меча": 30, "Инструмент": 18, "Проволока": 12, "Шуруп": 9,
+        "Медная руда": 16, "Бронзовый слиток": 28, "Мифриловая руда": 35,
+
+        // Tier 4
+        "Серебряный самородок": 30, "Серебряная монета": 35, "Серебряная пыль": 25, "Серебряный слиток": 40, "Бирюза": 50, "Лазурит": 60, "Лунный камень": 55, "Опал": 65,
+        "Жемчужина": 70, "Речной жемчуг": 60, "Серебряное кольцо": 80, "Малая корона": 100, "Амулет удачи": 90,
+        "Платиновая руда": 75, "Иридиевый слиток": 95, "Алмазная крошка": 110,
+
+        // Tier 5
+        "Золотой самородок": 80, "Золотая монета": 90, "Золотая пыль": 70, "Золотой слиток": 120, "Изумруд": 150, "Сапфир": 160, "Рубин": 170, "Алмаз": 200,
+        "Чистый топаз": 130, "Аквамарин": 140, "Ограненный алмаз": 250, "Корона короля": 300, "Скипетр": 280, "Сундук с сокровищами": 350,
+        "Черный опал": 190, "Палантир": 400,
+
+        // Tier 6
+        "Кварцевый кристалл": 200, "Аметист": 220, "Топаз": 240, "Флюорит": 230,
+        "Метеоритный осколок": 280, "Звездная пыль": 210, "Фрагмент кометы": 270,
+        "Кристалл маны": 300, "Энергетический кристалл": 320, "Кристалл исцеления": 310, "Призматический осколок": 350, "Магический артефакт": 400,
+        "Кристалл души": 380, "Вихревой камень": 420,
+
+        // Tier 7
+        "Древний свиток": 500, "Осколок реликвии": 550, "Забытый амулет": 600, "Мистическая руна": 650, "Фрагмент карты сокровищ": 520, "Запечатанный пергамент": 580, "Ископаемое яйцо": 700, "Окаменевшее сердце": 750,
+        "Меч героя": 800, "Щит мудреца": 850, "Шлем доблести": 900, "Доспехи света": 950, "Кольцо власти": 1000, "Книга заклинаний": 1100, "Ключ от измерения": 1200,
+        "Посох древности": 1050, "Плащ теней": 980,
+
+        // Tier 8
+        "Сердце дракона": 2000, "Перо феникса": 2200, "Кровь единорога": 2500, "Эликсир бессмертия": 3000, "Меч Света": 3500, "Щит Героя": 3800, "Магический свиток": 1800, "Амулет удачи": 2300,
+        "Корона мироздания": 4000, "Сфера предсказаний": 4500, "Клинок вечности": 5000, "Плащ невидимости": 5500,
+        "Арфа забвения": 6000, "Кристалл жизни": 6500, "Камень душ": 7000, "Око мудрости": 4800, "Чаша изобилия": 5200,
+
+        // Tier 9
+        "Осколок мироздания": 8000, "Слеза титана": 8500, "Эссенция хаоса": 9000, "Сердце вселенной": 9500,
+        "Длань времени": 10000, "Пламя творения": 11000, "Звездная корона": 12000, "Космический амулет": 13000,
+        "Меч судьбы": 14000, "Щит абсолюта": 15000, "Шлем вечности": 16000, "Доспехи бога": 17000,
+        "Кольцо бесконечности": 18000, "Книга мироздания": 19000, "Ключ от всех миров": 20000,
+
+        // Tier 10
+        "Ядро мира": 25000, "Искра жизни": 28000, "Дыхание богов": 30000, "Осколок предвечности": 32000,
+        "Вечный двигатель": 35000, "Слеза дракона-архонта": 40000, "Перо божественного феникса": 45000,
+        "Кровь первородного единорога": 50000, "Эликсир бессмертия богов": 55000, "Меч абсолютного света": 60000,
+        "Щит нерушимости": 65000, "Магический свиток высших измерений": 70000, "Амулет беспредельного удачи": 75000,
+        "Корона абсолютного мироздания": 80000, "Сфера всезнания": 85000, "Клинок первородного хаоса": 90000,
+        "Плащ абсолютной невидимости": 95000, "Арфа забвения богов": 100000, "Кристалл абсолютной жизни": 110000,
+        "Камень абсолютных душ": 120000
+    };
+
+    const surpriseBoxes = [
+        {
+            id: 'box_wood',
+            name: 'Деревянная Коробка',
+            price: 15,
+            content: [
+                "Ветвь", "Сучок", "Сосновая шишка", "Желудь", "Мох", "Лист папоротника", "Кора дерева", "Камень-галька",
+                "Кусок мха", "Маленький гриб", "Ивовый прутик", "Земляной червь", "Опавший лист", "Древесная смола",
+                "Засохшая трава", "Корень", "Цветок", "Ягода"
+            ],
+            className: 'box-wood',
+            textIcon: 'ДР'
+        },
+        {
+            id: 'box_stone',
+            name: 'Каменная Коробка',
+            price: 40,
+            content: [
+                "Кремень", "Обсидиан", "Мраморный осколок", "Гравий", "Базальт", "Гранит", "Янтарь", "Сердолик",
+                "Осколок гранита", "Песчаник", "Известняк", "Кварц", "Алебастр", "Сланец", "Каменный уголь",
+                "Агат", "Оникс", "Лава", "Галька"
+            ],
+            className: 'box-stone',
+            textIcon: 'КМ'
+        },
+        {
+            id: 'box_iron',
+            name: 'Железная Коробка',
+            price: 90,
+            content: [
+                "Железная руда", "Слиток железа", "Ржавый гвоздь", "Шестерёнка", "Болт", "Гайка", "Стальная пружина", "Металлическая крошка",
+                "Кованный крюк", "Цепь", "Железный обруч", "Осколок меча", "Инструмент", "Проволока", "Шуруп",
+                "Медная руда", "Бронзовый слиток", "Мифриловая руда"
+            ],
+            className: 'box-iron',
+            textIcon: 'ЖЛ'
+        },
+        {
+            id: 'box_silver',
+            name: 'Серебряная Коробка',
+            price: 180,
+            content: [
+                "Серебряный самородок", "Серебряная монета", "Серебряная пыль", "Серебряный слиток", "Бирюза", "Лазурит", "Лунный камень", "Опал",
+                "Жемчужина", "Речной жемчуг", "Серебряное кольцо", "Малая корона", "Амулет удачи",
+                "Платиновая руда", "Иридиевый слиток", "Алмазная крошка"
+            ],
+            className: 'box-silver',
+            textIcon: 'СР'
+        },
+        {
+            id: 'box_gold',
+            name: 'Золотая Коробка',
+            price: 350,
+            content: [
+                "Золотой самородок", "Золотая монета", "Золотая пыль", "Золотой слиток", "Изумруд", "Сапфир", "Рубин", "Алмаз",
+                "Чистый топаз", "Аквамарин", "Ограненный алмаз", "Корона короля", "Скипетр", "Сундук с сокровищами",
+                "Черный опал", "Палантир"
+            ],
+            className: 'box-gold',
+            textIcon: 'ЗЛ'
+        },
+        {
+            id: 'box_crystal',
+            name: 'Кристальная Коробка',
+            price: 700,
+            content: [
+                "Кварцевый кристалл", "Аметист", "Топаз", "Флюорит",
+                "Метеоритный осколок", "Звездная пыль", "Фрагмент кометы",
+                "Кристалл маны", "Энергетический кристалл", "Кристалл исцеления", "Призматический осколок", "Магический артефакт",
+                "Кристалл души", "Вихревой камень"
+            ],
+            className: 'box-crystal',
+            textIcon: 'КР'
+        },
+        {
+            id: 'box_ancient',
+            name: 'Древняя Коробка',
+            price: 1500,
+            content: [
+                "Древний свиток", "Осколок реликвии", "Забытый амулет", "Мистическая руна", "Фрагмент карты сокровищ", "Запечатанный пергамент", "Ископаемое яйцо", "Окаменевшее сердце",
+                "Меч героя", "Щит мудреца", "Шлем доблести", "Доспехи света", "Кольцо власти", "Книга заклинаний", "Ключ от измерения",
+                "Посох древности", "Плащ теней"
+            ],
+            className: 'box-ancient',
+            textIcon: 'ДВ'
+        },
+        {
+            id: 'box_legendary',
+            name: 'Легендарная Коробка',
+            price: 3000,
+            content: [
+                "Сердце дракона", "Перо феникса", "Кровь единорога", "Эликсир бессмертия", "Меч Света", "Щит Героя", "Магический свиток", "Амулет удачи",
+                "Корона мироздания", "Сфера предсказаний", "Клинок вечности", "Плащ невидимости",
+                "Арфа забвения", "Кристалл жизни", "Камень душ", "Око мудрости", "Чаша изобилия"
+            ],
+            className: 'box-legendary',
+            textIcon: 'ЛГ'
+        },
+        {
+            id: 'box_mythic',
+            name: 'Мифическая Коробка',
+            price: 6000,
+            content: [
+                "Осколок мироздания", "Слеза титана", "Эссенция хаоса", "Сердце вселенной",
+                "Длань времени", "Пламя творения", "Звездная корона", "Космический амулет",
+                "Меч судьбы", "Щит абсолюта", "Шлем вечности", "Доспехи бога",
+                "Кольцо бесконечности", "Книга мироздания", "Ключ от всех миров"
+            ],
+            className: 'box-mythic',
+            textIcon: 'МФ'
+        },
+        {
+            id: 'box_divine',
+            name: 'Божественная Коробка',
+            price: 12000,
+            content: [
+                "Ядро мира", "Искра жизни", "Дыхание богов", "Осколок предвечности",
+                "Вечный двигатель", "Слеза дракона-архонта", "Перо божественного феникса",
+                "Кровь первородного единорога", "Эликсир бессмертия богов", "Меч абсолютного света",
+                "Щит нерушимости", "Магический свиток высших измерений", "Амулет беспредельного удачи",
+                "Корона абсолютного мироздания", "Сфера всезнания", "Клинок первородного хаоса",
+                "Плащ абсолютной невидимости", "Арфа забвения богов", "Кристалл абсолютной жизни",
+                "Камень абсолютных душ"
+            ],
+            className: 'box-divine',
+            textIcon: 'БЖ'
+        }
+    ];
+
+
+    // Уникальный ID для каждого предмета, чтобы отслеживать его качество
+    function generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    // Получаем ссылки на DOM-элементы
+    const energyDisplay = document.getElementById("energy");
+    const getEnergyButton = document.getElementById("getEnergyButton");
+    const surpriseShop = document.getElementById("surpriseShop");
+    const collectionList = document.getElementById("collectionList");
+    const marketItemList = document.getElementById("marketItemList");
+
+    // Tabs
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    // Элементы модального окна открытия коробки
+    const boxModal = document.getElementById("boxModal");
+    const closeBoxModalButton = document.getElementById("closeBoxModal");
+    const modalBoxName = document.getElementById("modalBoxName");
+    const modalBoxPriceDisplay = document.getElementById("modalBoxPrice");
+    const modalItemList = document.getElementById("modalItemList");
+    const openQuantityInput = document.getElementById("openQuantity");
+    const buyWithAnimationButton = document.getElementById("buyWithAnimationButton");
+    const buyFastButton = document.getElementById("buyFastButton");
+    const animationScroller = document.getElementById("animationScroller");
+    const animationResult = document.getElementById("animationResult");
+    const boxAnimationContainer = document.getElementById("boxAnimationContainer");
+
+    let currentBox = null;
+
+    // Элементы модального окна продажи
+    const openSellModalButton = document.getElementById("openSellModalButton");
+    const sellModal = document.getElementById("sellModal");
+    const closeSellModalButton = document.getElementById("closeSellModal");
+    const sellItemList = document.getElementById("sellItemList");
+    const sellSelectedItemsButton = document.getElementById("sellSelectedItemsButton");
+    const sellAllItemsButton = document.getElementById("sellAllItemsButton"); // Новая кнопка
+
+    // Элементы модального окна результата предмета
+    const itemResultModal = document.getElementById("itemResultModal");
+    // const closeItemResultModalButton = document.getElementById("closeItemResultModal"); // Этот элемент не используется, так как модалка не закрывается крестиком
+    const resultItemPlaceholder = document.getElementById("resultItemPlaceholder");
+    const resultItemName = document.getElementById("resultItemName");
+    const resultItemQuality = document.getElementById("resultItemQuality");
+    const resultItemPrice = document.getElementById("resultItemPrice");
+    const keepItemButton = document.getElementById("keepItemButton");
+    const sellItemButton = document.getElementById("sellItemButton");
+
+    // Элементы модального окна капчи
+    const captchaModal = document.getElementById("captchaModal");
+    const captchaQuestion = document.getElementById("captchaQuestion");
+    const captchaAnswerInput = document.getElementById("captchaAnswer");
+    const submitCaptchaButton = document.getElementById("submitCaptchaButton");
+    const newCaptchaButton = document.getElementById("newCaptchaButton");
+    const captchaMessage = document.getElementById("captchaMessage");
+
+    // Элементы биржи
+    const buyMarketItemsButton = document.getElementById("buyMarketItemsButton");
+    const sellMarketItemsButton = document.getElementById("sellMarketItemsButton");
+    const refreshMarketButton = document.getElementById("refreshMarketButton");
+
+
+    // --- Сохранение/Загрузка данных ---
+
+    function saveData() {
+        localStorage.setItem('gameEnergy', energy);
+        localStorage.setItem('gameCollection', JSON.stringify(collection));
+        localStorage.setItem('lastEnergyTime', Date.now()); // Обновляем время получения энергии
+        localStorage.setItem('lastCaptchaTime', lastCaptchaTime); // Сохраняем время последней капчи
+        console.log("Данные сохранены в localStorage.");
+    }
+
+    function loadData() {
+        const savedEnergy = localStorage.getItem('gameEnergy');
+        const savedCollection = localStorage.getItem('gameCollection');
+        const lastEnergyTime = localStorage.getItem('lastEnergyTime');
+        const savedLastCaptchaTime = localStorage.getItem('lastCaptchaTime');
+
+        if (savedEnergy !== null) {
+            energy = parseInt(savedEnergy);
+        }
+        if (savedCollection !== null) {
+            try {
+                const parsedCollection = JSON.parse(savedCollection);
+                for (const itemName in parsedCollection) {
+                    if (typeof parsedCollection[itemName] === 'number') {
+                        // Это случай старой структуры, конвертируем в новую
+                        const items = [];
+                        for (let i = 0; i < parsedCollection[itemName]; i++) {
+                            items.push({ id: generateUUID(), name: itemName, quality: Math.random() });
+                        }
+                        collection[itemName] = items;
+                    } else {
+                        collection[itemName] = parsedCollection[itemName];
+                    }
+                }
+            } catch (e) {
+                console.error("Ошибка при парсинге коллекции из localStorage:", e);
+                collection = {};
+            }
+        }
+
+        if (lastEnergyTime) {
+            const timeElapsed = (Date.now() - parseInt(lastEnergyTime)) / 1000;
+            if (timeElapsed < ENERGY_COOLDOWN_TIME) {
+                isEnergyCooldown = true;
+                const remainingTime = Math.ceil(ENERGY_COOLDOWN_TIME - timeElapsed);
+                startEnergyCooldownTimer(remainingTime);
+            }
+        }
+        if (savedLastCaptchaTime !== null) {
+            lastCaptchaTime = parseInt(savedLastCaptchaTime);
+        }
+
+
+        console.log("Данные загружены из localStorage.");
+        updateEnergyDisplay();
+        renderCollection();
+    }
+
+    // --- Функции обновления UI ---
+
+    function updateEnergyDisplay() {
+        energyDisplay.textContent = energy;
+        updateShopButtonStates();
+        updateSellButtonState();
+        updateModalBoxButtons();
+        updateMarketButtonStates();
+    }
+
+    // --- Капча ---
+    function generateCaptcha() {
+        const num1 = Math.floor(Math.random() * 10) + 1;
+        const num2 = Math.floor(Math.random() * 10) + 1;
+        const operator = Math.random() < 0.5 ? '+' : '-';
+
+        let question = '';
+        let answer = 0;
+
+        if (operator === '+') {
+            question = `${num1} + ${num2} = ?`;
+            answer = num1 + num2;
+        } else {
+            if (num1 < num2) {
+                question = `${num2} - ${num1} = ?`;
+                answer = num2 - num1;
+            } else {
+                question = `${num1} - ${num2} = ?`;
+                answer = num1 - num2;
+            }
+        }
+        captchaQuestion.textContent = question;
+        captchaExpectedAnswer = answer;
+        captchaAnswerInput.value = '';
+        captchaMessage.textContent = '';
+        captchaModal.style.display = 'flex';
+    }
+
+    function submitCaptcha() {
+        const userAnswer = parseInt(captchaAnswerInput.value);
+        if (isNaN(userAnswer)) {
+            captchaMessage.textContent = "Пожалуйста, введите число.";
+            return;
+        }
+
+        if (userAnswer === captchaExpectedAnswer) {
+            captchaMessage.textContent = "Верно! Энергия получена.";
+            energy += 1;
+            updateEnergyDisplay();
+            lastCaptchaTime = Date.now(); // Обновляем время успешного прохождения капчи
+            saveData(); // Сохраняем новое время капчи
+            isEnergyCooldown = true;
+            startEnergyCooldownTimer(ENERGY_COOLDOWN_TIME);
+            setTimeout(() => {
+                captchaModal.style.display = 'none';
+            }, 500);
+        } else {
+            captchaMessage.textContent = "Неверно. Попробуйте снова.";
+        }
+    }
+
+    function newCaptcha() {
+        alert("Генерируется новая задача капчи.");
+        generateCaptcha();
+    }
+
+    // Модифицированная функция addEnergyWithCaptcha
+    function addEnergyWithCaptcha() {
+        if (isEnergyCooldown) {
+            console.log("Кулдаун на получение энергии активен.");
+            return;
+        }
+
+        const currentTime = Date.now();
+        const timeSinceLastCaptcha = currentTime - lastCaptchaTime;
+
+        // Если прошло меньше CAPTCHA_INTERVAL_MS с последней капчи, даем энергию без капчи
+        if (timeSinceLastCaptcha < CAPTCHA_INTERVAL_MS) {
+            energy += 1;
+            updateEnergyDisplay();
+            saveData();
+            isEnergyCooldown = true;
+            startEnergyCooldownTimer(ENERGY_COOLDOWN_TIME);
+            console.log("Энергия получена без капчи (внутри интервала).");
+        } else {
+            // Иначе, показываем капчу
+            generateCaptcha();
+            console.log("Показывается капча (прошло более 10 минут).");
+        }
+    }
+
+    function startEnergyCooldownTimer(duration) {
+        let timeLeft = duration;
+        getEnergyButton.disabled = true;
+        getEnergyButton.classList.add('cooldown');
+        getEnergyButton.textContent = `Получить Энергию (${timeLeft}с)`;
+
+        const timer = setInterval(() => {
+            timeLeft--;
+            if (timeLeft > 0) {
+                getEnergyButton.textContent = `Получить Энергию (${timeLeft}с)`;
+            } else {
+                clearInterval(timer);
+                isEnergyCooldown = false;
+                getEnergyButton.disabled = false;
+                getEnergyButton.classList.remove('cooldown');
+                getEnergyButton.textContent = `Получить Энергию (+1)`;
+                localStorage.removeItem('lastEnergyTime');
+            }
+        }, 1000);
+    }
+
+    function updateShopButtonStates() {
+        // No direct shop buttons to disable/enable based on energy here,
+        // as box modal handles purchase logic.
+    }
+
+    function renderShop() {
+        surpriseShop.innerHTML = '';
+        surpriseBoxes.forEach(box => {
+            const boxElement = document.createElement('div');
+            boxElement.className = 'shop-item';
+            boxElement.dataset.boxId = box.id;
+            boxElement.innerHTML = `
+                <div class="box-placeholder ${box.className}"> ${box.textIcon} </div>
+                <h3>${box.name}</h3>
+                <div class="shop-item-price">Цена: ${box.price} Энергии</div>
+                <button data-box-id="${box.id}">Открыть</button>
+            `;
+            surpriseShop.appendChild(boxElement);
+
+            boxElement.querySelector('button').addEventListener('click', (event) => {
+                event.stopPropagation();
+                openBoxModal(box.id);
+            });
+        });
+        updateShopButtonStates();
+    }
+
+    // Функция для определения класса качества на основе значения quality (0.0 - 1.0)
+    function getQualityClass(quality) {
+        if (quality <= 0.05) return 'quality-perfect';
+        if (quality <= 0.15) return 'quality-excellent';
+        if (quality <= 0.3) return 'quality-good';
+        if (quality <= 0.5) return 'quality-medium';
+        if (quality <= 0.7) return 'quality-fair';
+        if (quality <= 0.9) return 'quality-poor';
+        return 'quality-terrible';
+    }
+    function getQualityText(quality) {
+        if (quality <= 0.05) return 'ИДЕАЛЬНОЕ';
+        if (quality <= 0.15) return 'Отличное';
+        if (quality <= 0.3) return 'Очень хорошее';
+        if (quality <= 0.5) return 'Хорошее';
+        if (quality <= 0.7) return 'Удовлетворительное';
+        if (quality <= 0.9) return 'Плохое';
+        return 'УЖАСНОЕ';
+    }
+
+
+    function renderCollection() {
+        collectionList.innerHTML = '';
+        const allItems = [];
+        for (const itemName in collection) {
+            collection[itemName].forEach(itemInstance => {
+                allItems.push({
+                    name: itemInstance.name, // Use itemInstance.name
+                    id: itemInstance.id,
+                    quality: itemInstance.quality
+                });
+            });
+        }
+
+        allItems.sort((a, b) => {
+            const nameCompare = a.name.localeCompare(b.name);
+            if (nameCompare !== 0) return nameCompare;
+            return a.quality - b.quality;
+        });
+
+        if (allItems.length === 0) {
+            collectionList.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Ваша коллекция пуста.</p>';
+            return;
+        }
+
+        allItems.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'collection-item';
+            itemElement.dataset.itemId = item.id;
+            const itemImageText = item.name.substring(0, 2).toUpperCase();
+            const itemBgColor = itemColors[item.name] || '#ccc';
+            const qualityText = getQualityText(item.quality);
+            const qualityClass = getQualityClass(item.quality);
+
+            itemElement.innerHTML = `
+                <div class="item-placeholder" style="background-color: ${itemBgColor}; border-color: ${itemBgColor};"> ${itemImageText} </div>
+                <div>${item.name}</div>
+                <div class="item-quality ${qualityClass}">${qualityText} (${item.quality.toFixed(2)})</div>
+            `;
+            collectionList.appendChild(itemElement);
+        });
+    }
+
+    // --- Функции модального окна открытия коробки ---
+
+    function openBoxModal(boxId) {
+        currentBox = surpriseBoxes.find(b => b.id === boxId);
+        if (!currentBox) return;
+
+        modalBoxName.textContent = currentBox.name;
+        modalBoxPriceDisplay.textContent = currentBox.price;
+        modalItemList.innerHTML = '';
+        currentBox.content.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.textContent = item;
+            modalItemList.appendChild(itemDiv);
+        });
+
+        openQuantityInput.value = 1;
+        updateModalBoxButtons();
+        boxAnimationContainer.style.display = 'none';
+        animationResult.textContent = '';
+
+        boxModal.style.display = 'flex';
+    }
+
+    function closeBoxModal() {
+        boxModal.style.display = 'none';
+        currentBox = null;
+        openQuantityInput.value = 1;
+    }
+
+    function updateModalBoxButtons() {
+        if (!currentBox) return;
+
+        const quantity = parseInt(openQuantityInput.value);
+        const totalPrice = quantity * currentBox.price;
+
+        buyWithAnimationButton.disabled = energy < totalPrice || quantity <= 0;
+        buyFastButton.disabled = energy < totalPrice || quantity <= 0;
+
+        buyWithAnimationButton.textContent = `Открыть ${quantity} (с анимацией за ${totalPrice} Энергии)`;
+        buyFastButton.textContent = `Купить быстро ${quantity} (за ${totalPrice} Энергии)`;
+    }
+
+    openQuantityInput.addEventListener('input', updateModalBoxButtons);
+
+    buyWithAnimationButton.addEventListener('click', () => {
+        const quantity = parseInt(openQuantityInput.value);
+        if (!currentBox) return; // Add check here
+        const contentToPass = currentBox.content; // Capture content here
+
+        if (quantity > 0 && energy >= quantity * currentBox.price) {
+            itemsToProcessQueue = [];
+            for (let i = 0; i < quantity; i++) {
+                const itemData = {
+                    name: drawRandomItem(contentToPass), // Use captured content
+                    quality: Math.random(),
+                    id: generateUUID()
+                };
+                itemsToProcessQueue.push(itemData);
+            }
+            energy -= quantity * currentBox.price;
+            updateEnergyDisplay();
+            saveData();
+            closeBoxModal();
+            processNextItemInQueue(contentToPass); // Pass captured content
+        } else {
+            alert("Недостаточно энергии или неверное количество!");
+        }
+    });
+
+    buyFastButton.addEventListener('click', () => {
+        const quantity = parseInt(openQuantityInput.value);
+        if (!currentBox) return; // Add check here
+        const contentToPass = currentBox.content; // Capture content here
+
+        if (quantity > 0 && energy >= quantity * currentBox.price) {
+            itemsToProcessQueue = []; // Очищаем очередь для быстрого режима
+            for (let i = 0; i < quantity; i++) {
+                const itemData = {
+                    name: drawRandomItem(contentToPass), // Use captured content
+                    quality: Math.random(),
+                    id: generateUUID()
+                };
+                itemsToProcessQueue.push(itemData);
+            }
+            energy -= quantity * currentBox.price;
+            updateEnergyDisplay();
+            saveData();
+            closeBoxModal();
+            // Начинаем обработку каждого предмета в очереди через модальное окно
+            processNextItemInQueueFast(contentToPass); // Pass captured content
+        } else {
+            alert("Недостаточно энергии или неверное количество!");
+        }
+    });
+
+    function processNextItemInQueueFast() {
+        if (itemsToProcessQueue.length === 0) {
+            // Все предметы обработаны
+            renderCollection();
+            saveData();
+            return;
+        }
+
+        const itemToProcess = itemsToProcessQueue.shift(); // Берем следующий предмет
+
+        displayItemResultModal(itemToProcess, () => {
+            // Callback после того, как пользователь выбрал "Оставить" или "Продать"
+            // Продолжаем обрабатывать следующий предмет в очереди
+            processNextItemInQueueFast();
+        });
+    }
+
+
+    function drawRandomItem(contentArray) {
+        const randomIndex = Math.floor(Math.random() * contentArray.length);
+        return contentArray[randomIndex];
+    }
+
+    // --- Обработка очереди предметов с анимацией ---
+    function processNextItemInQueue(boxContentForAnimation) { // Removed default value here as it should always be passed
+        if (itemsToProcessQueue.length === 0) {
+            isProcessingItem = false;
+            return;
+        }
+
+        if (isProcessingItem) return;
+
+        isProcessingItem = true;
+        const itemToProcess = itemsToProcessQueue.shift();
+
+        boxAnimationContainer.style.display = 'flex';
+        animationResult.textContent = '';
+
+        startOpeningAnimation(boxContentForAnimation, itemToProcess.name, () => { // Используем boxContentForAnimation
+            boxAnimationContainer.style.display = 'none';
+            displayItemResultModal(itemToProcess, () => {
+                isProcessingItem = false; // Разрешаем обработку следующего предмета
+                processNextItemInQueue(boxContentForAnimation); // Передаем его дальше
+            });
+        });
+    }
+
+    // --- Анимация открытия коробки ---
+    function startOpeningAnimation(boxContent, receivedItemName, callback) {
+        animationScroller.innerHTML = '';
+        animationResult.textContent = 'Открытие...';
+
+        const itemsForAnimation = [];
+        // Добавляем 20 случайных элементов из boxContent
+        for (let i = 0; i < 20; i++) {
+            itemsForAnimation.push(drawRandomItem(boxContent));
+        }
+        // Гарантируем, что полученный предмет будет в конце
+        itemsForAnimation.push(receivedItemName);
+        itemsForAnimation.push(receivedItemName); // Add it twice to ensure it's visible in the last few items
+        itemsForAnimation.push(receivedItemName);
+
+
+        itemsForAnimation.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'animation-item';
+            const itemImageText = item.substring(0, 2).toUpperCase();
+            const itemBgColor = itemColors[item] || '#ccc';
+            itemDiv.innerHTML = `
+                <div class="item-placeholder-small" style="background-color: ${itemBgColor}; border-color: ${itemBgColor};"> ${itemImageText} </div>
+                <span>${item}</span>
+            `;
+            animationScroller.appendChild(itemDiv);
+        });
+
+        // Определяем ширину одного элемента для точной прокрутки
+        const firstAnimationItem = animationScroller.querySelector('.animation-item');
+        if (!firstAnimationItem) {
+            console.error("Не удалось найти элемент анимации для расчета ширины.");
+            if (callback) callback();
+            return;
+        }
+
+        const itemWidth = firstAnimationItem.offsetWidth +
+                         parseInt(getComputedStyle(firstAnimationItem).marginRight) +
+                         parseInt(getComputedStyle(firstAnimationItem).marginLeft);
+
+        const lastItemIndex = itemsForAnimation.length - 1;
+
+        // Рассчитываем целевую позицию для центрирования последнего элемента
+        // Мы хотим, чтобы последний элемент оказался по центру скроллера.
+        // Для этого прокручиваем на (позиция последнего элемента) - (половина ширины скроллера) + (половина ширины элемента)
+        const targetScrollPosition = (lastItemIndex * itemWidth) - (animationScroller.offsetWidth / 2) + (itemWidth / 2);
+
+
+        // Сброс и принудительный рефлоу перед началом анимации
+        animationScroller.style.transition = 'none';
+        animationScroller.style.transform = `translateX(0px)`; // Сброс трансформации
+        void animationScroller.offsetWidth; // Принудительный рефлоу: заставляет браузер применить изменения немедленно
+
+        const animationDuration = 3000; // Длительность анимации в мс
+        animationScroller.style.transition = `transform ${animationDuration / 1000}s ease-out`;
+        animationScroller.style.transform = `translateX(-${targetScrollPosition}px)`;
+
+        setTimeout(() => {
+            animationResult.textContent = `Вы получили: ${receivedItemName}!`;
+            if (callback) callback();
+        }, animationDuration + 200); // Добавляем небольшую задержку после завершения анимации
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    // --- Расчет цены продажи с учетом качества ---
+    function calculateSellPrice(itemName, quality) {
+        const basePrice = baseSellPrices[itemName] || 1;
+        const finalPrice = basePrice * (1.5 - quality); // Качество 0.0 дает 1.5х, 1.0 дает 0.5х
+        return Math.max(1, Math.round(finalPrice));
+    }
+
+    // --- Модальное окно "Продать/Оставить" ---
+    function displayItemResultModal(itemData, callback = null) { // Добавили необязательный callback
+        const itemName = itemData.name;
+        const itemQuality = itemData.quality;
+        const itemSellPrice = calculateSellPrice(itemName, itemQuality);
+
+        const itemImageText = itemName.substring(0, 2).toUpperCase();
+        const itemBgColor = itemColors[itemName] || '#ccc';
+        const qualityText = getQualityText(itemQuality);
+        const qualityClass = getQualityClass(itemQuality);
+
+
+        resultItemPlaceholder.style.backgroundColor = itemBgColor;
+        resultItemPlaceholder.style.borderColor = itemBgColor;
+        resultItemPlaceholder.textContent = itemImageText;
+        resultItemName.textContent = itemName;
+        resultItemQuality.textContent = `${qualityText} (${itemQuality.toFixed(2)})`;
+        resultItemQuality.className = `item-quality ${qualityClass}`;
+        resultItemPrice.textContent = `${itemSellPrice} Энергии`;
+
+        itemResultModal.style.display = 'flex';
+
+        keepItemButton.onclick = null;
+        sellItemButton.onclick = null;
+
+        keepItemButton.onclick = () => {
+            if (!collection[itemName]) {
+                collection[itemName] = [];
+            }
+            collection[itemName].push(itemData);
+            updateEnergyDisplay();
+            renderCollection();
+            saveData();
+            closeItemResultModal();
+            if (callback) callback(); // Вызываем callback
+        };
+
+        sellItemButton.onclick = () => {
+            energy += itemSellPrice;
+            updateEnergyDisplay();
+            saveData();
+            closeItemResultModal();
+            if (callback) callback(); // Вызываем callback
+        };
+    }
+
+    function closeItemResultModal() {
+        itemResultModal.style.display = 'none';
+    }
+
+    // --- Функции модального окна продажи ---
+
+    function openSellModal() {
+        selectedItemsToSell = {};
+        renderSellItems();
+        updateSellButtonState();
+        sellModal.style.display = 'flex';
+    }
+
+    function closeSellModal() {
+        sellModal.style.display = 'none';
+    }
+
+    function renderSellItems() {
+        sellItemList.innerHTML = '';
+        const allItemsForSale = [];
+        for (const itemName in collection) {
+            collection[itemName].forEach(itemInstance => {
+                allItemsForSale.push(itemInstance);
+            });
+        }
+
+        allItemsForSale.sort((a, b) => {
+            const nameCompare = a.name.localeCompare(b.name);
+            if (nameCompare !== 0) return nameCompare;
+            return a.quality - b.quality;
+        });
+
+        if (allItemsForSale.length === 0) {
+            sellItemList.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">У вас нет предметов для продажи.</p>';
+            sellAllItemsButton.disabled = true; // Отключаем кнопку, если нет предметов
+            return;
+        } else {
+            sellAllItemsButton.disabled = false; // Включаем, если есть
+        }
+
+        allItemsForSale.forEach(itemInstance => {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'sell-item';
+            itemElement.dataset.itemId = itemInstance.id;
+            if (selectedItemsToSell[itemInstance.id]) {
+                itemElement.classList.add('selected-for-sell');
+            }
+
+            const itemImageText = itemInstance.name.substring(0, 2).toUpperCase();
+            const itemBgColor = itemColors[itemInstance.name] || '#ccc';
+            const sellPrice = calculateSellPrice(itemInstance.name, itemInstance.quality);
+            const qualityText = getQualityText(itemInstance.quality);
+            const qualityClass = getQualityClass(itemInstance.quality);
+
+            itemElement.innerHTML = `
+                <div class="item-placeholder" style="background-color: ${itemBgColor}; border-color: ${itemBgColor};"> ${itemImageText} </div>
+                <div class="sell-item-name">${itemInstance.name}</div>
+                <div class="item-quality ${qualityClass}">${qualityText} (${itemInstance.quality.toFixed(2)})</div>
+                <div class="sell-item-price-tag">${sellPrice} Энергии</div>
+            `;
+
+            itemElement.addEventListener('click', () => {
+                const itemId = itemElement.dataset.itemId;
+                if (selectedItemsToSell[itemId]) {
+                    delete selectedItemsToSell[itemId];
+                } else {
+                    selectedItemsToSell[itemId] = true;
+                }
+                renderSellItems();
+                updateSellButtonState();
+            });
+
+            sellItemList.appendChild(itemElement);
+        });
+    }
+
+    function updateSellButtonState() {
+        let totalSellValue = 0;
+        let totalItemsSelected = 0;
+
+        for (const itemId in selectedItemsToSell) {
+            let foundItem = null;
+            for (const itemName in collection) {
+                foundItem = collection[itemName].find(item => item.id === itemId);
+                if (foundItem) break;
+            }
+
+            if (foundItem) {
+                const price = calculateSellPrice(foundItem.name, foundItem.quality);
+                totalSellValue += price;
+                totalItemsSelected += 1;
+            }
+        }
+
+        sellSelectedItemsButton.disabled = totalItemsSelected === 0;
+        sellSelectedItemsButton.textContent = `Продать выбранное (${totalSellValue} Энергии)`;
+    }
+
+    function sellSelectedItems() {
+        let totalEarnedEnergy = 0;
+        const itemsToDelete = [];
+
+        for (const itemId in selectedItemsToSell) {
+            let foundItem = null;
+            let foundItemName = null;
+            let foundItemIndex = -1;
+
+            for (const itemName in collection) {
+                foundItemIndex = collection[itemName].findIndex(item => item.id === itemId);
+                if (foundItemIndex !== -1) {
+                    foundItem = collection[itemName][foundItemIndex];
+                    foundItemName = itemName;
+                    break;
+                }
+            }
+
+            if (foundItem) {
+                const itemPrice = calculateSellPrice(foundItem.name, foundItem.quality);
+                totalEarnedEnergy += itemPrice;
+                itemsToDelete.push({ name: foundItemName, id: itemId, index: foundItemIndex });
+            }
+        }
+
+        itemsToDelete.forEach(itemInfo => {
+            const { name, id, index } = itemInfo;
+            if (collection[name]) {
+                // Удаляем элемент по его UUID, чтобы избежать проблем с индексами после splice
+                collection[name] = collection[name].filter(item => item.id !== id);
+                if (collection[name].length === 0) {
+                    delete collection[name];
+                }
+            }
+        });
+
+        energy += totalEarnedEnergy;
+        selectedItemsToSell = {};
+
+        alert(`Вы успешно продали выбранные предметы и получили ${totalEarnedEnergy} Энергии!`);
+
+        updateEnergyDisplay();
+        renderCollection();
+        renderSellItems();
+        saveData();
+    }
+
+    function sellAllItems() {
+        if (Object.keys(collection).length === 0) {
+            alert("У вас нет предметов для продажи!");
+            return;
+        }
+
+        if (!confirm("Вы уверены, что хотите продать ВСЕ предметы в вашей коллекции?")) {
+            return;
+        }
+
+        let totalEarnedEnergy = 0;
+        for (const itemName in collection) {
+            collection[itemName].forEach(itemInstance => {
+                const itemPrice = calculateSellPrice(itemInstance.name, itemInstance.quality);
+                totalEarnedEnergy += itemPrice;
+            });
+        }
+
+        collection = {}; // Очищаем всю коллекцию
+        energy += totalEarnedEnergy;
+        selectedItemsToSell = {}; // Очищаем выбранные для продажи
+
+        alert(`Вы успешно продали ВСЕ предметы и получили ${totalEarnedEnergy} Энергии!`);
+
+        updateEnergyDisplay();
+        renderCollection();
+        renderSellItems(); // Обновляем список продажи, он должен быть пуст
+        saveData();
+    }
+
+    // --- Функции биржи ---
+
+    function generateMarketItems() {
+        marketItems = {}; // Очищаем старые предметы на бирже
+        const allPossibleItems = [];
+        for (const key in baseSellPrices) {
+            allPossibleItems.push(key);
+        }
+
+        const numberOfItemsOnMarket = Math.floor(Math.random() * (30 - 10 + 1)) + 10; // От 10 до 30 предметов
+
+        for (let i = 0; i < numberOfItemsOnMarket; i++) {
+            const randomItemName = allPossibleItems[Math.floor(Math.random() * allPossibleItems.length)];
+            const itemQuality = Math.random();
+            const basePrice = baseSellPrices[randomItemName] || 1;
+
+            // Цены на бирже будут колебаться вокруг базовой цены +/- 30%
+            const priceFluctuation = (Math.random() * 0.6) - 0.3; // От -0.3 до +0.3
+            let marketPrice = Math.round(basePrice * (1 + priceFluctuation));
+            marketPrice = Math.max(1, marketPrice); // Цена не может быть меньше 1
+
+            const itemId = generateUUID();
+            marketItems[itemId] = {
+                id: itemId,
+                name: randomItemName,
+                quality: itemQuality,
+                price: marketPrice
+            };
+        }
+        renderMarketItems();
+        updateMarketButtonStates();
+    }
+
+    function renderMarketItems() {
+        marketItemList.innerHTML = '';
+        const sortedMarketItems = Object.values(marketItems).sort((a, b) => {
+            const nameCompare = a.name.localeCompare(b.name);
+            if (nameCompare !== 0) return nameCompare;
+            return a.quality - b.quality;
+        });
+
+        if (sortedMarketItems.length === 0) {
+            marketItemList.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Биржа пуста. Обновите цены.</p>';
+        }
+
+        sortedMarketItems.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'market-item';
+            itemElement.dataset.itemId = item.id;
+
+            const isSelectedForBuy = selectedMarketItems.buy[item.id];
+            // const isSelectedForSell = selectedMarketItems.sell[item.id]; // этот флаг здесь не нужен
+
+            if (isSelectedForBuy) {
+                itemElement.classList.add('selected-for-buy');
+            }
+            // else if (isSelectedForSell) { // этот блок здесь не нужен
+            //     itemElement.classList.add('selected-for-sell');
+            // }
+
+            const itemImageText = item.name.substring(0, 2).toUpperCase();
+            const itemBgColor = itemColors[item.name] || '#ccc';
+            const qualityText = getQualityText(item.quality);
+            const qualityClass = getQualityClass(item.quality);
+
+            itemElement.innerHTML = `
+                <div class="item-placeholder" style="background-color: ${itemBgColor}; border-color: ${itemBgColor};"> ${itemImageText} </div>
+                <div class="market-item-name">${item.name}</div>
+                <div class="item-quality ${qualityClass}">${qualityText} (${item.quality.toFixed(2)})</div>
+                <div class="market-item-price-tag">Цена: ${item.price} Энергии</div>
+            `;
+
+            itemElement.addEventListener('click', () => {
+                const itemId = itemElement.dataset.itemId;
+                // Очищаем предыдущий выбор для "Купить" или "Продать",
+                // так как один и тот же предмет не может быть выбран для обоих действий одновременно.
+                // Изначально, предметы на бирже - это те, что можно купить.
+                // Для продажи своих предметов, пользователь должен перейти в "Моя Коллекция" -> "Продать предметы".
+
+                // Если предмет уже выбран для покупки, снимаем выбор
+                if (selectedMarketItems.buy[itemId]) {
+                    delete selectedMarketItems.buy[itemId];
+                } else {
+                    // Если предмет не выбран для покупки, выбираем его.
+                    selectedMarketItems.buy[itemId] = true;
+                }
+                renderMarketItems();
+                updateMarketButtonStates();
+            });
+
+            marketItemList.appendChild(itemElement);
+        });
+    }
+
+    function updateMarketButtonStates() {
+        let totalBuyCost = 0;
+        let totalItemsToBuy = 0;
+        for (const itemId in selectedMarketItems.buy) {
+            if (marketItems[itemId]) {
+                totalBuyCost += marketItems[itemId].price;
+                totalItemsToBuy += 1;
+            }
+        }
+
+        buyMarketItemsButton.disabled = totalItemsToBuy === 0 || energy < totalBuyCost;
+        buyMarketItemsButton.textContent = `Купить выбранное (${totalBuyCost} Энергии)`;
+
+        let totalSellValue = 0;
+        let totalItemsToSell = 0;
+        // Расчет для кнопки "Продать выбранное на бирже" (из коллекции игрока)
+        const itemsInPlayerCollection = [];
+        for (const itemName in collection) {
+            itemsInPlayerCollection.push(...collection[itemName]);
+        }
+
+        // Создаем маппинг marketItems по названию для быстрого поиска цены
+        const marketPricesByName = {};
+        for (const itemId in marketItems) {
+            const item = marketItems[itemId];
+            // Берем только одну цену для данного типа предмета на бирже.
+            // В реальной бирже нужно было бы брать минимальную/среднюю цену или выставлять свою.
+            // Для простоты берем первую попавшуюся.
+            if (marketPricesByName[item.name] === undefined) {
+                marketPricesByName[item.name] = item.price;
+            }
+        }
+
+        for (const itemInstance of itemsInPlayerCollection) {
+            if (selectedItemsToSell[itemInstance.id]) { // Используем selectedItemsToSell из модалки "Продать предметы"
+                const marketPrice = marketPricesByName[itemInstance.name];
+                // Если предмет есть на бирже, используем его биржевую цену, иначе - базовую цену продажи
+                const price = marketPrice !== undefined ? marketPrice : calculateSellPrice(itemInstance.name, itemInstance.quality);
+                totalSellValue += price;
+                totalItemsToSell += 1;
+            }
+        }
+        sellMarketItemsButton.disabled = totalItemsToSell === 0;
+        sellMarketItemsButton.textContent = `Продать выбранное на бирже (${totalSellValue} Энергии)`;
+
+    }
+
+    function buySelectedMarketItems() {
+        let totalCost = 0;
+        const itemsToBuy = [];
+        for (const itemId in selectedMarketItems.buy) {
+            if (marketItems[itemId]) {
+                totalCost += marketItems[itemId].price;
+                itemsToBuy.push(marketItems[itemId]);
+            }
+        }
+
+        if (itemsToBuy.length === 0) {
+            alert("Пожалуйста, выберите предметы для покупки.");
+            return;
+        }
+
+        if (energy < totalCost) {
+            alert("Недостаточно энергии для покупки выбранных предметов!");
+            return;
+        }
+
+        energy -= totalCost;
+        itemsToBuy.forEach(item => {
+            if (!collection[item.name]) {
+                collection[item.name] = [];
+            }
+            // Создаем новый экземпляр предмета для коллекции, используя его качество с биржи
+            collection[item.name].push({ id: generateUUID(), name: item.name, quality: item.quality });
+            // Удаляем предмет с биржи после покупки
+            delete marketItems[item.id];
+        });
+
+        selectedMarketItems.buy = {}; // Очищаем выбор
+        alert(`Вы успешно купили ${itemsToBuy.length} предметов за ${totalCost} Энергии!`);
+        updateEnergyDisplay();
+        renderCollection();
+        renderMarketItems(); // Обновить биржу, чтобы удалить купленные предметы
+        saveData();
+    }
+
+    function sellSelectedCollectionItemsOnMarket() {
+         let totalEarnedEnergy = 0;
+        const itemsToDelete = []; // Предметы, которые будут удалены из коллекции
+
+        for (const itemId in selectedItemsToSell) {
+            let foundItem = null;
+            let foundItemName = null;
+
+            for (const itemName in collection) {
+                foundItem = collection[itemName].find(item => item.id === itemId);
+                if (foundItem) {
+                    foundItemName = itemName;
+                    break;
+                }
+            }
+
+            if (foundItem) {
+                // Ищем этот предмет на бирже по его названию, чтобы получить рыночную цену
+                const marketItem = Object.values(marketItems).find(mItem => mItem.name === foundItem.name);
+                const sellPrice = marketItem ? marketItem.price : calculateSellPrice(foundItem.name, foundItem.quality);
+
+                totalEarnedEnergy += sellPrice;
+                itemsToDelete.push({ name: foundItemName, id: itemId });
+            }
+        }
+
+        if (itemsToDelete.length === 0) {
+            alert("Пожалуйста, выберите предметы в своей коллекции для продажи на бирже.");
+            return;
+        }
+
+        itemsToDelete.forEach(itemInfo => {
+            const { name, id } = itemInfo;
+            if (collection[name]) {
+                collection[name] = collection[name].filter(item => item.id !== id);
+                if (collection[name].length === 0) {
+                    delete collection[name];
+                }
+            }
+        });
+
+        energy += totalEarnedEnergy;
+        selectedItemsToSell = {}; // Очищаем выбор для продажи
+
+        alert(`Вы успешно продали выбранные предметы на бирже и получили ${totalEarnedEnergy} Энергии!`);
+
+        updateEnergyDisplay();
+        renderCollection();
+        renderSellItems(); // Обновляем модалку продажи
+        renderMarketItems(); // Обновляем биржу, хотя предмет не добавляется на биржу, а продается
+        saveData();
+    }
+
+
+    // Запуск таймера обновления цен на бирже
+    function startMarketRefreshTimer() {
+        if (marketRefreshTimer) {
+            clearInterval(marketRefreshTimer);
+        }
+        marketRefreshTimer = setInterval(() => {
+            generateMarketItems();
+            console.log("Цены на бирже обновлены.");
+        }, MARKET_REFRESH_INTERVAL_MS);
+    }
+
+    // --- Отладочные команды (Debug Commands) ---
+    const debug = {
+        login: function(password) {
+            if (password === DEBUG_PASSWORD) {
+                debugModeEnabled = true;
+                console.log("%c[DEBUG] Режим отладки включен. Добро пожаловать!", "color: lightgreen; font-weight: bold;");
+                // Убрал alert
+            } else {
+                console.error("%c[DEBUG] Неверный пароль. Режим отладки не включен.", "color: red; font-weight: bold;");
+                alert("Неверный пароль для отладки.");
+            }
+        },
+        addEnergy: function(amount = 100) {
+            if (!debugModeEnabled) {
+                console.warn("[DEBUG] Отладочные команды доступны только после ввода пароля (debug.login('пароль'))");
+                return;
+            }
+            energy += amount;
+            updateEnergyDisplay();
+            saveData();
+            console.log(`[DEBUG] Добавлено ${amount} энергии. Текущая энергия: ${energy}`);
+        },
+        clearCollection: function() {
+            if (!debugModeEnabled) {
+                console.warn("[DEBUG] Отладочные команды доступны только после ввода пароля (debug.login('пароль'))");
+                return;
+            }
+            if (confirm("Вы уверены, что хотите очистить всю коллекцию?")) {
+                collection = {};
+                renderCollection();
+                saveData();
+                console.log("[DEBUG] Коллекция очищена.");
+            }
+        },
+        addItem: function(itemName, quantity = 1, quality = null) {
+            if (!debugModeEnabled) {
+                console.warn("[DEBUG] Отладочные команды доступны только после ввода пароля (debug.login('пароль'))");
+                return;
+            }
+            if (typeof itemName !== 'string' || itemName.trim() === '') {
+                console.error("[DEBUG] Неверное название предмета. Пример: debug.addItem('Камень', 5)");
+                return;
+            }
+            // Проверяем, существует ли такой предмет в наших данных
+            if (!itemColors[itemName] && !baseSellPrices[itemName]) {
+                console.warn(`[DEBUG] Предмет '${itemName}' не найден в списках itemColors или baseSellPrices. Он будет добавлен, но может отображаться некорректно.`);
+            }
+
+            if (!collection[itemName]) {
+                collection[itemName] = [];
+            }
+            for (let i = 0; i < quantity; i++) {
+                collection[itemName].push({
+                    id: generateUUID(),
+                    name: itemName,
+                    quality: quality !== null ? Math.min(1.0, Math.max(0.0, quality)) : Math.random()
+                });
+            }
+            renderCollection();
+            saveData();
+            console.log(`[DEBUG] Добавлено ${quantity}x '${itemName}' (Качество: ${quality !== null ? quality.toFixed(2) : 'случайное'}).`);
+        },
+        resetGame: function() {
+            if (!debugModeEnabled) {
+                console.warn("[DEBUG] Отладочные команды доступны только после ввода пароля (debug.login('пароль'))");
+                return;
+            }
+            if (confirm("Вы уверены, что хотите полностью сбросить игру (энергия и коллекция)?")) {
+                energy = 0;
+                collection = {};
+                isEnergyCooldown = false;
+                lastCaptchaTime = 0; // Сбрасываем время капчи при сбросе игры
+                localStorage.clear();
+                updateEnergyDisplay();
+                renderCollection();
+                getEnergyButton.classList.remove('cooldown');
+                getEnergyButton.textContent = `Получить Энергию (+1)`;
+                console.log("[DEBUG] Игра полностью сброшена.");
+            }
+        },
+        resetCaptchaTime: function() {
+             if (!debugModeEnabled) {
+                console.warn("[DEBUG] Отладочные команды доступны только после ввода пароля (debug.login('пароль'))");
+                return;
+            }
+            lastCaptchaTime = 0; // Сбрасываем время капчи
+            saveData();
+            console.log("[DEBUG] Время капчи сброшено.");
+        },
+        addRandomItems: function(count = 10, tier = 1) { // Tier parameter is not used in this implementation, but kept for future expansion
+            if (!debugModeEnabled) {
+                console.warn("[DEBUG] Отладочные команды доступны только после ввода пароля (debug.login('пароль'))");
+                return;
+            }
+            const allItems = Object.keys(itemColors); // Берем все возможные названия предметов
+            if (allItems.length === 0) {
+                console.warn("[DEBUG] Нет доступных предметов для добавления.");
+                return;
+            }
+
+            for (let i = 0; i < count; i++) {
+                const randomItemName = allItems[Math.floor(Math.random() * allItems.length)];
+                this.addItem(randomItemName, 1, Math.random());
+            }
+            console.log(`[DEBUG] Добавлено ${count} случайных предметов.`);
+        },
+        setEnergy: function(amount) {
+            if (!debugModeEnabled) {
+                console.warn("[DEBUG] Отладочные команды доступны только после ввода пароля (debug.login('пароль'))");
+                return;
+            }
+            if (typeof amount !== 'number' || amount < 0) {
+                console.error("[DEBUG] Неверное количество энергии. Должно быть положительное число.");
+                return;
+            }
+            energy = amount;
+            updateEnergyDisplay();
+            saveData();
+            console.log(`[DEBUG] Энергия установлена на ${energy}.`);
+        },
+        showCollection: function() {
+            if (!debugModeEnabled) {
+                console.warn("[DEBUG] Отладочные команды доступны только после ввода пароля (debug.login('пароль'))");
+                return;
+            }
+            console.log("[DEBUG] Ваша коллекция:", collection);
+            alert("Коллекция отображена в консоли.");
+        }
+    };
+
+    window.debug = debug;
+
+
+    // --- Инициализация при загрузке страницы ---
+    document.addEventListener("DOMContentLoaded", () => {
+        console.log("Страница загружена, инициализация игры...");
+
+        loadData();
+        renderShop();
+        generateMarketItems(); // Генерируем начальные предметы для биржи
+        startMarketRefreshTimer(); // Запускаем таймер обновления биржи
+
+        getEnergyButton.addEventListener("click", addEnergyWithCaptcha);
+        console.log("Кнопка 'Получить Энергию' настроена.");
+
+        // Tab menu logic
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTab = button.dataset.tab;
+
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                tabContents.forEach(content => {
+                    if (content.id === targetTab) {
+                        content.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                    }
+                });
+                // При переключении на вкладку коллекции или биржи, обновляем их
+                if (targetTab === 'collection') {
+                    renderCollection();
+                } else if (targetTab === 'market') {
+                    renderMarketItems();
+                    updateMarketButtonStates();
+                } else if (targetTab === 'shop') {
+                     updateShopButtonStates(); // Убедиться, что кнопки магазина актуальны
+                }
+            });
+        });
+
+
+        // Обработчики для модального окна открытия коробки
+        closeBoxModalButton.addEventListener('click', closeBoxModal);
+        boxModal.addEventListener('click', (event) => {
+            if (event.target === boxModal) {
+                closeBoxModal();
+            }
+        });
+
+        // Обработчики для модального окна продажи
+        openSellModalButton.addEventListener('click', openSellModal);
+        closeSellModalButton.addEventListener('click', closeSellModal);
+        sellSelectedItemsButton.addEventListener('click', sellSelectedItems);
+        sellAllItemsButton.addEventListener('click', sellAllItems); // Обработчик для новой кнопки
+        sellModal.addEventListener('click', (event) => {
+            if (event.target === sellModal) {
+                closeSellModal();
+            }
+        });
+
+        // itemResultModal.addEventListener('click', (event) => { // Закомментировал, чтобы не было alert'а при клике вне
+        //     if (event.target === itemResultModal) {
+        //         // alert("Пожалуйста, выберите 'Оставить' или 'Продать' предмет.");
+        //     }
+        // });
+        // closeItemResultModalButton.addEventListener('click', () => {
+        //     // Если пользователь закрывает модалку предмета напрямую, а не через кнопки "Оставить/Продать"
+        //     // Это может произойти, если он открыл консоль и вручную закрыл.
+        //     // В этом случае предмет будет потерян, что нежелательно.
+        //     // Поэтому я просто ничего не делаю, заставляя пользователя выбрать
+        //     // action с предметом. Если вы хотите разрешить закрытие,
+        //     // то нужно решить, что делать с предметом.
+        //     console.warn("Модальное окно результата предмета не может быть закрыто без выбора действия. Предмет будет потерян, если не выбрать 'Оставить' или 'Продать'.");
+        // });
+
+        // Обработчики для модального окна капчи
+        submitCaptchaButton.addEventListener('click', submitCaptcha);
+        captchaAnswerInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                submitCaptcha();
+            }
+        });
+        newCaptchaButton.addEventListener('click', newCaptcha);
+
+        // Обработчики для биржи
+        buyMarketItemsButton.addEventListener('click', buySelectedMarketItems);
+        sellMarketItemsButton.addEventListener('click', sellSelectedCollectionItemsOnMarket); // Теперь продает выбранное из коллекции по биржевым ценам
+        refreshMarketButton.addEventListener('click', () => {
+            generateMarketItems();
+            console.log("Цены на бирже обновлены вручную.");
+        });
+
+        console.log("Для отладки в консоли: debug.login('gemini')");
+    });
+</script>
+</body>
+</html>
